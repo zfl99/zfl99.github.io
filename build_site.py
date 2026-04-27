@@ -20,55 +20,93 @@ def load_title_map():
     with open(TITLE_MAP_FILE, "r", encoding="utf-8") as f:
         return json.load(f)
 
+def build_index_page(posts_meta):
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
 
-def build_post_pages(title_map):
-    POSTS_DIR.mkdir(parents=True, exist_ok=True)
-    posts_meta = []
+    posts_meta_sorted = sorted(posts_meta, key=lambda x: x["threadid"], reverse=True)
 
-    for md_file in sorted(MD_DIR.glob("*.md")):
-        threadid = md_file.stem
-        title = title_map.get(threadid, f"Thread {threadid}")
+    items_html = ""
+    for p in posts_meta_sorted:
+        items_html += f"""
+        <div class="post-item">
+          <a href="posts/{p['threadid']}.html" class="post-link">
+            <span class="post-title">{p['title']}</span>
+            <span class="post-id">#{p['threadid']}</span>
+          </a>
+        </div>
+        """
 
-        with open(md_file, "r", encoding="utf-8") as f:
-            md_text = f.read()
-
-        html_body = markdown.markdown(
-            md_text,
-            extensions=["extra", "tables", "fenced_code"]
-        )
-
-        post_html = f"""<!DOCTYPE html>
+    index_html = f"""<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <title>{title}</title>
-  <link rel="stylesheet" href="../style.css">
+  <title>板块帖子列表</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header class="site-header">
-    <h1><a href="../index.html">板块帖子列表</a></h1>
+    <h1>板块帖子列表</h1>
   </header>
-  <main class="post-container">
-    <article class="post">
-      <h2 class="post-title">{title}</h2>
-      <div class="post-content">
-        {html_body}
-      </div>
-    </article>
+  <main class="main-container">
+    <div id="post-list">
+      {items_html}
+    </div>
   </main>
 </body>
 </html>
 """
-        out_file = POSTS_DIR / f"{threadid}.html"
-        with open(out_file, "w", encoding="utf-8") as f:
-            f.write(post_html)
+    with open(OUT_DIR / "index.html", "w", encoding="utf-8") as f:
+        f.write(index_html)
 
-        posts_meta.append({
-            "threadid": threadid,
-            "title": title
-        })
+# 懒加载代码如下
+# def build_post_pages(title_map):
+#     POSTS_DIR.mkdir(parents=True, exist_ok=True)
+#     posts_meta = []
 
-    return posts_meta
+#     for md_file in sorted(MD_DIR.glob("*.md")):
+#         threadid = md_file.stem
+#         title = title_map.get(threadid, f"Thread {threadid}")
+
+#         with open(md_file, "r", encoding="utf-8") as f:
+#             md_text = f.read()
+
+#         html_body = markdown.markdown(
+#             md_text,
+#             extensions=["extra", "tables", "fenced_code"]
+#         )
+
+#         post_html = f"""<!DOCTYPE html>
+# <html lang="zh-CN">
+# <head>
+#   <meta charset="UTF-8">
+#   <title>{title}</title>
+#   <link rel="stylesheet" href="../style.css">
+# </head>
+# <body>
+#   <header class="site-header">
+#     <h1><a href="../index.html">板块帖子列表</a></h1>
+#   </header>
+#   <main class="post-container">
+#     <article class="post">
+#       <h2 class="post-title">{title}</h2>
+#       <div class="post-content">
+#         {html_body}
+#       </div>
+#     </article>
+#   </main>
+# </body>
+# </html>
+# """
+#         out_file = POSTS_DIR / f"{threadid}.html"
+#         with open(out_file, "w", encoding="utf-8") as f:
+#             f.write(post_html)
+
+#         posts_meta.append({
+#             "threadid": threadid,
+#             "title": title
+#         })
+
+#     return posts_meta
 
 
 def build_index_page(posts_meta):
