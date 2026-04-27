@@ -12,8 +12,8 @@ TITLE_MAP_FILE = ROOT / "thread_title_map.json"
 OUT_DIR = ROOT / "board_info"
 POSTS_DIR = OUT_DIR / "posts"
 
-with open("thread_title_map.json", "r", encoding="utf-8") as f:
-    title_map = json.load(f)
+# with open("thread_title_map.json", "r", encoding="utf-8") as f:
+#     title_map = json.load(f)
 
 
 def load_title_map():
@@ -341,7 +341,7 @@ a:hover {
 def main():
     title_map = load_title_map()
     posts_meta = build_post_pages(title_map)
-    build_index_page(posts_meta)
+    build_index_page(posts_meta,title_map)
     build_style()
     print("静态站点构建完成：board_info/")
 
