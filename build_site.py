@@ -12,6 +12,9 @@ TITLE_MAP_FILE = ROOT / "thread_title_map.json"
 OUT_DIR = ROOT / "board_info"
 POSTS_DIR = OUT_DIR / "posts"
 
+with open("thread_title_map.json", "r", encoding="utf-8") as f:
+    title_map = json.load(f)
+
 
 def load_title_map():
     if not TITLE_MAP_FILE.exists():
@@ -20,18 +23,17 @@ def load_title_map():
     with open(TITLE_MAP_FILE, "r", encoding="utf-8") as f:
         return json.load(f)
 
-def build_index_page(posts_meta):
+def build_index_page(posts_meta, title_map):
     OUT_DIR.mkdir(parents=True, exist_ok=True)
 
-    posts_meta_sorted = sorted(posts_meta, key=lambda x: x["threadid"], reverse=True)
-
     items_html = ""
-    for p in posts_meta_sorted:
+    # 按照映射表的顺序来遍历
+    for tid, title in title_map.items():
         items_html += f"""
         <div class="post-item">
-          <a href="posts/{p['threadid']}.html" class="post-link">
-            <span class="post-title">{p['title']}</span>
-            <span class="post-id">#{p['threadid']}</span>
+          <a href="posts/{tid}.html" class="post-link">
+            <span class="post-title">{title}</span>
+            <span class="post-id">#{tid}</span>
           </a>
         </div>
         """
@@ -57,6 +59,45 @@ def build_index_page(posts_meta):
 """
     with open(OUT_DIR / "index.html", "w", encoding="utf-8") as f:
         f.write(index_html)
+
+# 按帖子id排序如下
+# def build_index_page(posts_meta):
+#     OUT_DIR.mkdir(parents=True, exist_ok=True)
+
+#     posts_meta_sorted = sorted(posts_meta, key=lambda x: x["threadid"], reverse=True)
+
+#     items_html = ""
+#     for p in posts_meta_sorted:
+#         items_html += f"""
+#         <div class="post-item">
+#           <a href="posts/{p['threadid']}.html" class="post-link">
+#             <span class="post-title">{p['title']}</span>
+#             <span class="post-id">#{p['threadid']}</span>
+#           </a>
+#         </div>
+#         """
+
+#     index_html = f"""<!DOCTYPE html>
+# <html lang="zh-CN">
+# <head>
+#   <meta charset="UTF-8">
+#   <title>板块帖子列表</title>
+#   <link rel="stylesheet" href="style.css">
+# </head>
+# <body>
+#   <header class="site-header">
+#     <h1>板块帖子列表</h1>
+#   </header>
+#   <main class="main-container">
+#     <div id="post-list">
+#       {items_html}
+#     </div>
+#   </main>
+# </body>
+# </html>
+# """
+#     with open(OUT_DIR / "index.html", "w", encoding="utf-8") as f:
+#         f.write(index_html)
 
 # 懒加载代码如下
 # def build_post_pages(title_map):
