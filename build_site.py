@@ -99,116 +99,116 @@ def build_index_page(posts_meta, title_map):
 #     with open(OUT_DIR / "index.html", "w", encoding="utf-8") as f:
 #         f.write(index_html)
 
-# 懒加载代码如下
-# def build_post_pages(title_map):
-#     POSTS_DIR.mkdir(parents=True, exist_ok=True)
-#     posts_meta = []
 
-#     for md_file in sorted(MD_DIR.glob("*.md")):
-#         threadid = md_file.stem
-#         title = title_map.get(threadid, f"Thread {threadid}")
+def build_post_pages(title_map):
+    POSTS_DIR.mkdir(parents=True, exist_ok=True)
+    posts_meta = []
 
-#         with open(md_file, "r", encoding="utf-8") as f:
-#             md_text = f.read()
+    for md_file in sorted(MD_DIR.glob("*.md")):
+        threadid = md_file.stem
+        title = title_map.get(threadid, f"Thread {threadid}")
 
-#         html_body = markdown.markdown(
-#             md_text,
-#             extensions=["extra", "tables", "fenced_code"]
-#         )
+        with open(md_file, "r", encoding="utf-8") as f:
+            md_text = f.read()
 
-#         post_html = f"""<!DOCTYPE html>
-# <html lang="zh-CN">
-# <head>
-#   <meta charset="UTF-8">
-#   <title>{title}</title>
-#   <link rel="stylesheet" href="../style.css">
-# </head>
-# <body>
-#   <header class="site-header">
-#     <h1><a href="../index.html">板块帖子列表</a></h1>
-#   </header>
-#   <main class="post-container">
-#     <article class="post">
-#       <h2 class="post-title">{title}</h2>
-#       <div class="post-content">
-#         {html_body}
-#       </div>
-#     </article>
-#   </main>
-# </body>
-# </html>
-# """
-#         out_file = POSTS_DIR / f"{threadid}.html"
-#         with open(out_file, "w", encoding="utf-8") as f:
-#             f.write(post_html)
+        html_body = markdown.markdown(
+            md_text,
+            extensions=["extra", "tables", "fenced_code"]
+        )
 
-#         posts_meta.append({
-#             "threadid": threadid,
-#             "title": title
-#         })
-
-#     return posts_meta
-
-
-def build_index_page(posts_meta):
-    OUT_DIR.mkdir(parents=True, exist_ok=True)
-
-    # 简单懒加载：初始只显示前 20 条，点击“加载更多”再显示后面的
-    posts_meta_sorted = sorted(posts_meta, key=lambda x: x["threadid"], reverse=True)
-    posts_json = json.dumps(posts_meta_sorted, ensure_ascii=False)
-
-    index_html = f"""<!DOCTYPE html>
+        post_html = f"""<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <title>板块帖子列表</title>
-  <link rel="stylesheet" href="style.css">
+  <title>{title}</title>
+  <link rel="stylesheet" href="../style.css">
 </head>
 <body>
   <header class="site-header">
-    <h1>板块帖子列表</h1>
+    <h1><a href="../index.html">板块帖子列表</a></h1>
   </header>
-  <main class="main-container">
-    <div id="post-list"></div>
-    <button id="load-more-btn">加载更多</button>
+  <main class="post-container">
+    <article class="post">
+      <h2 class="post-title">{title}</h2>
+      <div class="post-content">
+        {html_body}
+      </div>
+    </article>
   </main>
-
-  <script>
-    const allPosts = {posts_json};
-    const pageSize = 20;
-    let currentIndex = 0;
-
-    function renderMore() {{
-      const list = document.getElementById('post-list');
-      const end = Math.min(currentIndex + pageSize, allPosts.length);
-      for (let i = currentIndex; i < end; i++) {{
-        const p = allPosts[i];
-        const item = document.createElement('div');
-        item.className = 'post-item';
-        item.innerHTML = `
-          <a href="posts/${{p.threadid}}.html" class="post-link">
-            <span class="post-title">${{p.title}}</span>
-            <span class="post-id">#${{p.threadid}}</span>
-          </a>
-        `;
-        list.appendChild(item);
-      }}
-      currentIndex = end;
-      if (currentIndex >= allPosts.length) {{
-        document.getElementById('load-more-btn').style.display = 'none';
-      }}
-    }}
-
-    document.getElementById('load-more-btn').addEventListener('click', renderMore);
-
-    // 初次加载
-    renderMore();
-  </script>
 </body>
 </html>
 """
-    with open(OUT_DIR / "index.html", "w", encoding="utf-8") as f:
-        f.write(index_html)
+        out_file = POSTS_DIR / f"{threadid}.html"
+        with open(out_file, "w", encoding="utf-8") as f:
+            f.write(post_html)
+
+        posts_meta.append({
+            "threadid": threadid,
+            "title": title
+        })
+
+    return posts_meta
+
+# 懒加载代码如下
+# def build_index_page(posts_meta):
+#     OUT_DIR.mkdir(parents=True, exist_ok=True)
+
+#     # 简单懒加载：初始只显示前 20 条，点击“加载更多”再显示后面的
+#     posts_meta_sorted = sorted(posts_meta, key=lambda x: x["threadid"], reverse=True)
+#     posts_json = json.dumps(posts_meta_sorted, ensure_ascii=False)
+
+#     index_html = f"""<!DOCTYPE html>
+# <html lang="zh-CN">
+# <head>
+#   <meta charset="UTF-8">
+#   <title>板块帖子列表</title>
+#   <link rel="stylesheet" href="style.css">
+# </head>
+# <body>
+#   <header class="site-header">
+#     <h1>板块帖子列表</h1>
+#   </header>
+#   <main class="main-container">
+#     <div id="post-list"></div>
+#     <button id="load-more-btn">加载更多</button>
+#   </main>
+
+#   <script>
+#     const allPosts = {posts_json};
+#     const pageSize = 20;
+#     let currentIndex = 0;
+
+#     function renderMore() {{
+#       const list = document.getElementById('post-list');
+#       const end = Math.min(currentIndex + pageSize, allPosts.length);
+#       for (let i = currentIndex; i < end; i++) {{
+#         const p = allPosts[i];
+#         const item = document.createElement('div');
+#         item.className = 'post-item';
+#         item.innerHTML = `
+#           <a href="posts/${{p.threadid}}.html" class="post-link">
+#             <span class="post-title">${{p.title}}</span>
+#             <span class="post-id">#${{p.threadid}}</span>
+#           </a>
+#         `;
+#         list.appendChild(item);
+#       }}
+#       currentIndex = end;
+#       if (currentIndex >= allPosts.length) {{
+#         document.getElementById('load-more-btn').style.display = 'none';
+#       }}
+#     }}
+
+#     document.getElementById('load-more-btn').addEventListener('click', renderMore);
+
+#     // 初次加载
+#     renderMore();
+#   </script>
+# </body>
+# </html>
+# """
+#     with open(OUT_DIR / "index.html", "w", encoding="utf-8") as f:
+#         f.write(index_html)
 
 
 def build_style():
